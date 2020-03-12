@@ -20,41 +20,41 @@
 
 String textIn, textOut;
 
-#define m1a 33  // motor 1 logic pin a
-#define m1b 31  // motor 1 logic pin b
-#define m1e 6   // motor 1 enable pin
-#define m1_hall1 A10  // motor 1 sensor 1 pin
-#define m1_hall2 A11  // motor 1 sensor 2 pin
-int m1[3] = {m1a, m1b, m1e};  // holds pins for set functions
+#define M1A 33  // motor 1 logic pin a
+#define M1B 31  // motor 1 logic pin b
+#define M1E 6   // motor 1 enable pin
+#define M1_HALL1 A10  // motor 1 sensor 1 pin
+#define M1_HALL2 A11  // motor 1 sensor 2 pin
+int m1[3] = {M1A, M1B, M1E};  // holds pins for set functions
 
-#define m2a 30  // motor 2 logic pin a
-#define m2b 32  // motor 2 logic pin b
-#define m2e 3   // motor 2 enable pin
-#define m2_hall1 A6  // motor 2 sensor 1 pin
-#define m2_hall2 A7  // motor 2 sensor 2 pin
-int m2[3] = {m2a, m2b, m2e};  // holds pins for set functions
+#define M2A 30  // motor 2 logic pin a
+#define M2B 32  // motor 2 logic pin b
+#define M2E 3   // motor 2 enable pin
+#define M2_HALL1 A6  // motor 2 sensor 1 pin
+#define M2_HALL2 A7  // motor 2 sensor 2 pin
+int m2[3] = {M2A, M2B, M2E};  // holds pins for set functions
 
-#define m3a 25  // motor 3 logic pin a
-#define m3b 27  // motor 3 logic pin b
-#define m3e 5   // motor 3 enable pin
-#define m3_hall1 A8  // motor 3 sensor 1 pin
-#define m3_hall2 A9  // motor 3 sensor 2 pin
-int m3[3] = {m3a, m3b, m3e};  // holds pins for set functions
+#define M3A 25  // motor 3 logic pin a
+#define M3B 27  // motor 3 logic pin b
+#define M3E 5   // motor 3 enable pin
+#define M3_HALL1 A8  // motor 3 sensor 1 pin
+#define M3_HALL2 A9  // motor 3 sensor 2 pin
+int m3[3] = {M3A, M3B, M3E};  // holds pins for set functions
 
-#define m4a 26  // motor 4 logic pin a
-#define m4b 24  // motor 4 logic pin b
-#define m4e 4   // motor 4 enable pin
-#define m4_hall1 A4  // motor 4 sensor 1 pin
-#define m4_hall2 A5  // motor 4 sensor 2 pin
-int m4[3] = {m4a, m4b, m4e};  // holds pins for set functions
+#define M4A 26  // motor 4 logic pin a
+#define M4B 24  // motor 4 logic pin b
+#define M4E 4   // motor 4 enable pin
+#define M4_HALL1 A4  // motor 4 sensor 1 pin
+#define M4_HALL2 A5  // motor 4 sensor 2 pin
+int m4[3] = {M4A, M4B, M4E};  // holds pins for set functions
 
 // lazy susan bracket
-#define m5a 36  // motor 4 logic pin a
-#define m5b 38  // motor 4 logic pin b
-#define m5e 9   // motor 4 enable pin
-#define m5_hall1 44  // motor 4 sensor 1 pin
-#define m5_hall2 46  // motor 4 sensor 2 pin
-int m5[3] = {m5a, m5b, m5e};  // holds pins for set functions
+#define M5A 36  // motor 4 logic pin a
+#define M5B 38  // motor 4 logic pin b
+#define M5E 9   // motor 4 enable pin
+#define M5_HALL1 44  // motor 4 sensor 1 pin
+#define M5_HALL2 46  // motor 4 sensor 2 pin
+int m5[3] = {M5A, M5B, M5E};  // holds pins for set functions
 
 
 //line sensors
@@ -78,8 +78,6 @@ int z = 0;  // height of the GBE
 int dir = 0, sc = 1;
 int stepsPerCenti = 250;
 int stepsPerRev = 200;
-int lowerStopVal = 0;
-int upperStopVal = 0;
 
 #define STEP_PIN 8
 #define DIR_PIN 50
@@ -89,10 +87,16 @@ int upperStopVal = 0;
 #define SLEEP 41
 #define ENABLE 47
 
-#define SERVO_PIN 7
+#define SERVO_PIN 2
 
 #define UPPER_STOP A0
 #define LOWER_STOP A1
+#define LEFT_STOP A2
+#define RIGHT_STOP A3
+int lowerStopVal = 0;
+int upperStopVal = 0;
+int leftStopVal = 0;
+int rightStopVal = 0;
 
 
 void setCW(int *motor)
@@ -212,12 +216,16 @@ void rotateCCW()
 
 
 
+// stepper motor functions
 void pulseMotor(int dir)
 {
+  enableMotor();
+
   digitalWrite(STEP_PIN, HIGH);
-  delay(1);
+  delayMicroseconds(1100);
   digitalWrite(STEP_PIN, LOW);
-  delay(1);
+  delayMicroseconds(1100);
+
 }
 
 void moveGEBDist(int dir, float dist, float scale)
@@ -237,13 +245,13 @@ void moveGEBDist(int dir, float dist, float scale)
 
   for (i = 0; i < numSteps; i++)
   {
-    upperStopVal = digitalRead(UPPER_STOP);
-    lowerStopVal = digitalRead(LOWER_STOP);
-
-    if (upperStopVal == 1  ||  lowerStopVal == 1)
-    {
-      return;
-    }
+//    upperStopVal = digitalRead(UPPER_STOP);
+//    lowerStopVal = digitalRead(LOWER_STOP);
+//
+//    if (upperStopVal == 1  ||  lowerStopVal == 1)
+//    {
+//      return;
+//    }
 
     pulseMotor(dir);
   }
@@ -264,6 +272,7 @@ void moveGEBSteps(int dir, float steps, float scale)
 
     pulseMotor(dir);
   }
+
 }
 
 void homeGBE(float scale, int *z)
@@ -319,14 +328,18 @@ void setScale(int scale)
 
 void enableMotor(void)
 {
-  Serial.println("Motor Enabled");
+  //Serial.println("Motor Enabled");
   digitalWrite(RST, HIGH);
+  //digitalWrite(ENABLE, LOW);
+  //digitalWrite(SLEEP, HIGH);
 }
 
 void disableMotor(void)
 {
-  Serial.println("Motor Disabled");
+  //Serial.println("Motor Disabled");
   digitalWrite(RST, LOW);
+  //digitalWrite(ENABLE, HIGH);
+  //digitalWrite(SLEEP, LOW);
 }
 
 void pushServo(void)
@@ -378,92 +391,8 @@ void pushServoIn(void)
   servo.write(75);
 }
 
-
-
-void setup()
+void getSerialInput(void)
 {
-  pinMode(m1a, OUTPUT);
-  pinMode(m1b, OUTPUT);
-  pinMode(m1e, OUTPUT);
-  pinMode(m1_hall1, INPUT);
-
-  pinMode(m2a, OUTPUT);
-  pinMode(m2b, OUTPUT);
-  pinMode(m2e, OUTPUT);
-  pinMode(m2_hall1, INPUT);
-
-  pinMode(m3a, OUTPUT);
-  pinMode(m3b, OUTPUT);
-  pinMode(m3e, OUTPUT);
-  pinMode(m3_hall1, INPUT);
-
-  pinMode(m4a, OUTPUT);
-  pinMode(m4b, OUTPUT);
-  pinMode(m4e, OUTPUT);
-  pinMode(m4_hall1, INPUT);
-
-
-  pinMode(SERVO_PIN, OUTPUT);
-  pinMode(STEP_PIN, OUTPUT);
-
-
-  pinMode(STEP_PIN, OUTPUT);
-  pinMode(DIR_PIN, OUTPUT);
-  pinMode(SERVO_PIN, OUTPUT);
-  pinMode(MS1, OUTPUT);
-  pinMode(MS2, OUTPUT);
-  pinMode(RST, OUTPUT);
-  pinMode(SLEEP, OUTPUT);
-  pinMode(ENABLE, OUTPUT);
-
-  pinMode(UPPER_STOP, INPUT);
-  pinMode(LOWER_STOP, INPUT);
-
-  pinMode(LINE1, INPUT);
-  pinMode(LINE2, INPUT);
-  pinMode(LINE3, INPUT);
-  pinMode(LINE4, INPUT);
-
-
-  Serial.begin(9600);
-  Serial1.begin(38400);
-  Serial.setTimeout(10);
-  Serial1.setTimeout(10);
-  Serial.println("Begining Program...");
-  Serial.println("");
-
-  servo.attach(SERVO_PIN);
-
-
-  digitalWrite(STEP_PIN, LOW);
-  digitalWrite(DIR_PIN, LOW);
-  digitalWrite(SLEEP, HIGH);
-  digitalWrite(ENABLE, LOW);
-  digitalWrite(RST, HIGH);
-
-  //servo.write(90);
-  servo.write(50);
-
-  digitalWrite(MS1, LOW);  // whole steps
-  digitalWrite(MS2, LOW);
-
-
-  moveForward();
-  delay(500);
-  stopAllMotors();
-}
-
-void loop()
-{
-  upperStopVal = digitalRead(UPPER_STOP);
-  lowerStopVal = digitalRead(LOWER_STOP);
-
-  line1 = digitalRead(LINE1);
-  line2 = digitalRead(LINE2);
-  line3 = digitalRead(LINE3);
-  line4 = digitalRead(LINE4);
-
-
   // computer serial
   if (Serial.available())
   {
@@ -478,7 +407,7 @@ void loop()
   {
     textIn = Serial1.readString();
     // auto new line sent in textIn
-    Serial.print(textIn);
+    //Serial.print(textIn);
     //Serial1.print(textIn);
 
     // main motor commands
@@ -566,6 +495,7 @@ void loop()
       Serial.println("Proceed");
       Serial1.println("Proceed");
     }
+
     // GBE commands
     else if (textIn == "whole\n")
     {
@@ -657,7 +587,7 @@ void loop()
     {
       Serial.println("moving set dist");
       Serial1.println("moving set dist");
-      moveGEBDist(dir, 2, sc);
+      moveGEBDist(dir, 1, sc);
       Serial.println("Proceed");
       Serial1.println("Proceed");
     }
@@ -710,5 +640,107 @@ void loop()
       Serial.print(" : ");
       Serial.println(line4);
     }
+    else if (textIn == "turnTable\n")
+    {
+      Serial.println("testing turnTable");
+      Serial1.println("testing turnTable");
+      setCW(m5);
+      startMotor(m5);
+      delay(250);
+      stopMotor(m5);
+      Serial.println("Proceed");
+      Serial1.println("Proceed");
+    }
   }
+}
+
+
+void setup()
+{
+  pinMode(M1A, OUTPUT);
+  pinMode(M1B, OUTPUT);
+  pinMode(M1E, OUTPUT);
+  pinMode(M1_HALL1, INPUT);
+  pinMode(M1_HALL2, INPUT);
+
+  pinMode(M2A, OUTPUT);
+  pinMode(M2B, OUTPUT);
+  pinMode(M2E, OUTPUT);
+  pinMode(M2_HALL1, INPUT);
+  pinMode(M2_HALL2, INPUT);
+
+  pinMode(M3A, OUTPUT);
+  pinMode(M3B, OUTPUT);
+  pinMode(M3E, OUTPUT);
+  pinMode(M3_HALL1, INPUT);
+  pinMode(M3_HALL2, INPUT);
+
+  pinMode(M4A, OUTPUT);
+  pinMode(M4B, OUTPUT);
+  pinMode(M4E, OUTPUT);
+  pinMode(M4_HALL1, INPUT);
+  pinMode(M4_HALL2, INPUT);
+
+  pinMode(STEP_PIN, OUTPUT);
+  pinMode(DIR_PIN, OUTPUT);
+  pinMode(MS1, OUTPUT);
+  pinMode(MS2, OUTPUT);
+  pinMode(RST, OUTPUT);
+  pinMode(SLEEP, OUTPUT);
+  pinMode(ENABLE, OUTPUT);
+
+  pinMode(SERVO_PIN, OUTPUT);
+
+  pinMode(UPPER_STOP, INPUT);
+  pinMode(LOWER_STOP, INPUT);
+
+  pinMode(LINE1, INPUT);
+  pinMode(LINE2, INPUT);
+  pinMode(LINE3, INPUT);
+  pinMode(LINE4, INPUT);
+
+
+  Serial.begin(9600);
+  Serial1.begin(38400);
+  Serial.setTimeout(10);
+  Serial1.setTimeout(10);
+  Serial.println("Begining Program...");
+  Serial.println("");
+
+  servo.attach(SERVO_PIN);
+
+  digitalWrite(STEP_PIN, LOW);
+  digitalWrite(DIR_PIN, LOW);
+  digitalWrite(ENABLE, LOW);
+  digitalWrite(SLEEP, HIGH);
+
+  servo.write(90);
+  servo.write(75);
+
+  setScale(1);
+  setDir(0);
+  stopAllMotors();
+}
+
+void loop()
+{
+  upperStopVal = digitalRead(UPPER_STOP);
+  lowerStopVal = digitalRead(LOWER_STOP);
+  leftStopVal = digitalRead(LEFT_STOP);
+  rightStopVal = digitalRead(RIGHT_STOP);
+
+  line1 = digitalRead(LINE1);
+  line2 = digitalRead(LINE2);
+  line3 = digitalRead(LINE3);
+  line4 = digitalRead(LINE4);
+
+  getSerialInput();
+
+  //  Serial.print(line1);
+  //  Serial.print(" : ");
+  //  Serial.print(line2);
+  //  Serial.print(" : ");
+  //  Serial.print(line3);
+  //  Serial.print(" : ");
+  //  Serial.println(line4);
 }
